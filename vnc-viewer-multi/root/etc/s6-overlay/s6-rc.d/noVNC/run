@@ -19,13 +19,49 @@ for server in $(bashio::config 'vnc_servers|keys'); do
     
     # Configure noVNC settings for this specific server
     bashio::log.info "Configuring noVNC settings for ${name}"
+    
+    # For standard vnc.html - modify ui.js for compatibility
     sed -i "/UI.initSetting('show_dot'/ s/false/true/; /UI.initSetting('resize'/ s/off/scale/" "/var/www/port_${proxy_port}/app/ui.js"
     
-    # Inject password if configured
+    # For vnc_lite.html - no modification needed, it uses URL parameters
+    bashio::log.info "vnc_lite.html will use URL parameters for configuration"
+    
+    # Create a redirect page with auto-login for convenience
     if bashio::config.has_value "vnc_servers[${server}].password"; then
         password=$(bashio::config "vnc_servers[${server}].password")
-        bashio::log.info "Injecting password for ${name}"
-        sed -i "s/WebUtil.getConfigVar('password');/'${password}';/" "/var/www/port_${proxy_port}/app/ui.js"
+        bashio::log.info "Creating auto-login URLs for ${name}"
+        
+        # Create vnc_auto.html that redirects to vnc_lite.html with password
+        cat > "/var/www/port_${proxy_port}/vnc_auto.html" << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto-connecting to ${name}...</title>
+    <script>
+        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true';
+    </script>
+</head>
+<body>
+    <p>Connecting to ${name}...</p>
+</body>
+</html>
+EOF
+    else
+        # Create vnc_auto.html without password
+        cat > "/var/www/port_${proxy_port}/vnc_auto.html" << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto-connecting to ${name}...</title>
+    <script>
+        window.location.href = 'vnc_lite.html?scale=true&cursor=true';
+    </script>
+</head>
+<body>
+    <p>Connecting to ${name}...</p>
+</body>
+</html>
+EOF
     fi
 done
 
@@ -70,8 +106,17 @@ for server in $(bashio::config 'vnc_servers|keys'); do
     port=$(bashio::config "vnc_servers[${server}].port" "5900")
     proxy_port=$(bashio::config "vnc_servers[${server}].proxy_port")
     
-    bashio::log.info "  ${name}: http://YOUR_HA_IP:${proxy_port}/vnc.html"
-    bashio::log.info "    or: http://YOUR_HA_IP:${proxy_port}/vnc_lite.html"
+    if bashio::config.has_value "vnc_servers[${server}].password"; then
+        password=$(bashio::config "vnc_servers[${server}].password")
+        bashio::log.info "  ${name}:"
+        bashio::log.info "    Auto-login: http://YOUR_HA_IP:${proxy_port}/vnc_auto.html"
+        bashio::log.info "    With password: http://YOUR_HA_IP:${proxy_port}/vnc_lite.html?password=${password}"
+        bashio::log.info "    Standard: http://YOUR_HA_IP:${proxy_port}/vnc.html"
+    else
+        bashio::log.info "  ${name}:"
+        bashio::log.info "    Direct: http://YOUR_HA_IP:${proxy_port}/vnc_lite.html"
+        bashio::log.info "    Standard: http://YOUR_HA_IP:${proxy_port}/vnc.html"
+    fi
     bashio::log.info "    Target: ${host}:${port}"
 done
 
