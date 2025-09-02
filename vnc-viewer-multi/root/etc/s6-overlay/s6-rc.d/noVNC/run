@@ -39,16 +39,16 @@ start_proxy() {
     
     bashio::log.info "Starting proxy for ${name}: ${host}:${port} -> 0.0.0.0:${proxy_port}"
     
-    # Start websockify with web files
+    # Start websockify with web files in background
     cd "/var/www/port_${proxy_port}"
-    /usr/local/bin/websockify \
+    nohup /usr/local/bin/websockify \
         --web="/var/www/port_${proxy_port}" \
-        --daemon \
-        --pidfile="/var/run/websockify_${proxy_port}.pid" \
         "0.0.0.0:${proxy_port}" \
-        "${host}:${port}" &
+        "${host}:${port}" \
+        > "/var/log/websockify_${proxy_port}.log" 2>&1 &
     
     local pid=$!
+    echo "$pid" > "/var/run/websockify_${proxy_port}.pid"
     bashio::log.info "Started proxy for ${name} with PID ${pid}"
 }
 
@@ -90,6 +90,7 @@ while true; do
             pid=$(cat "/var/run/websockify_${proxy_port}.pid")
             if ! kill -0 "$pid" 2>/dev/null; then
                 bashio::log.warning "Proxy for ${name} (port ${proxy_port}) died, restarting..."
+                rm -f "/var/run/websockify_${proxy_port}.pid"
                 start_proxy "$server"
             fi
         else
