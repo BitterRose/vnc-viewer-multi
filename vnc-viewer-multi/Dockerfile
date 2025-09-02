@@ -1,14 +1,7 @@
 ARG BUILD_FROM
-FROM $BUILD_FROM AS no_vnc
+FROM $BUILD_FROM
 
-RUN apk add --no-cache \
-    git
-
-RUN git config --global advice.detachedHead false && \
-    git clone https://github.com/novnc/noVNC.git -b v1.5.0 /noVNC
-
-FROM $BUILD_FROM AS websockify
-
+# Install all required packages in one layer
 RUN apk add --no-cache \
     git \
     python3 \
@@ -16,36 +9,30 @@ RUN apk add --no-cache \
     py3-numpy \
     py3-pip \
     build-base \
-    python3-dev
+    python3-dev \
+    procps \
+    bash
 
-RUN pip3 install --break-system-packages --no-cache-dir Cython
-
-# hadolint ignore=DL3003
+# Clone noVNC
 RUN git config --global advice.detachedHead false && \
-    git clone https://github.com/novnc/websockify -b v0.12.0 /websockify && \
-    cd /websockify && python3 setup.py install
+    git clone https://github.com/novnc/noVNC.git -b v1.5.0 /noVNC
 
-FROM $BUILD_FROM AS running
+# Install websockify
+RUN pip3 install --break-system-packages --no-cache-dir websockify
 
-RUN apk add --no-cache \
-    git \
-    python3 \
-    py3-setuptools \
-    py3-numpy \
-    procps
+# Make sure websockify is executable
+RUN chmod +x /usr/bin/websockify || chmod +x /usr/local/bin/websockify || true
 
-COPY --from=no_vnc /noVNC /noVNC
+# Find and create symlink if websockify is not in expected location
+RUN if [ ! -f /usr/local/bin/websockify ]; then \
+        WEBSOCKIFY_PATH=$(find /usr -name websockify -type f -executable 2>/dev/null | head -1); \
+        if [ -n "$WEBSOCKIFY_PATH" ]; then \
+            ln -sf "$WEBSOCKIFY_PATH" /usr/local/bin/websockify; \
+        fi; \
+    fi
 
-# Copy websockify installation
-RUN PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
-    mkdir -p /usr/local/lib/python${PYTHON_VERSION}/site-packages/
-
-COPY --from=websockify /usr/local/lib/python*/site-packages/ /tmp/websockify-packages/
-COPY --from=websockify /usr/local/bin/websockify /usr/local/bin/websockify
-
-RUN PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
-    cp -r /tmp/websockify-packages/* /usr/local/lib/python${PYTHON_VERSION}/site-packages/ && \
-    rm -rf /tmp/websockify-packages
+# Verify websockify installation
+RUN websockify --help > /dev/null || { echo "Websockify installation failed"; exit 1; }
 
 # Expose ports for multiple VNC proxies
 EXPOSE 6080 6081 6082 6083 6084 6085 6086 6087 6088 6089
