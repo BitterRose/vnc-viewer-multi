@@ -1,26 +1,22 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM AS no_vnc
 
-RUN apt-get update && apt-get -y --no-install-recommends install \
-    git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    git
 
 RUN git config --global advice.detachedHead false && \
     git clone https://github.com/novnc/noVNC.git -b v1.5.0 /noVNC
 
 FROM $BUILD_FROM AS websockify
 
-RUN apt-get update && apt-get -y --no-install-recommends install \
+RUN apk add --no-cache \
     git \
     python3 \
-    python3-setuptools \
-    python3-numpy \
-    python3-pip \
-    build-essential \
-    python3-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    py3-setuptools \
+    py3-numpy \
+    py3-pip \
+    build-base \
+    python3-dev
 
 RUN pip3 install --break-system-packages --no-cache-dir Cython
 
@@ -31,22 +27,31 @@ RUN git config --global advice.detachedHead false && \
 
 FROM $BUILD_FROM AS running
 
-RUN apt-get update && apt-get -y --no-install-recommends install \
+RUN apk add --no-cache \
     git \
     python3 \
-    python3-setuptools \
-    python3-numpy \
-    procps \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    py3-setuptools \
+    py3-numpy \
+    procps
 
 COPY --from=no_vnc /noVNC /noVNC
-COPY --from=websockify /usr/local/lib/python3.11/dist-packages/ /usr/local/lib/python3.11/dist-packages/
+
+# Copy websockify installation
+RUN PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
+    mkdir -p /usr/local/lib/python${PYTHON_VERSION}/site-packages/
+
+COPY --from=websockify /usr/local/lib/python*/site-packages/ /tmp/websockify-packages/
 COPY --from=websockify /usr/local/bin/websockify /usr/local/bin/websockify
+
+RUN PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
+    cp -r /tmp/websockify-packages/* /usr/local/lib/python${PYTHON_VERSION}/site-packages/ && \
+    rm -rf /tmp/websockify-packages
 
 # Expose ports for multiple VNC proxies
 EXPOSE 6080 6081 6082 6083 6084 6085 6086 6087 6088 6089
 
+WORKDIR /
+COPY root /
+
 ENTRYPOINT [ "/init" ]
 CMD []
-COPY root /
