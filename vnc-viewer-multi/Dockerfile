@@ -13,9 +13,9 @@ RUN apk add --no-cache \
     procps \
     bash
 
-# Clone noVNC
+# Clone your custom noVNC fork
 RUN git config --global advice.detachedHead false && \
-    git clone https://github.com/novnc/noVNC.git -b v1.5.0 /noVNC
+    git clone https://github.com/BitterRose/noVNC-BitterRose.git /noVNC
 
 # Install websockify
 RUN pip3 install --break-system-packages --no-cache-dir websockify
