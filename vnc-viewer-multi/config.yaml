@@ -1,5 +1,5 @@
 name: VNC Viewer Multi
-version: 1.0.8
+version: 1.0.9
 slug: vnc-viewer-multi
 panel_icon: mdi:remote-desktop
 description: Multiple VNC servers proxy for Home Assistant

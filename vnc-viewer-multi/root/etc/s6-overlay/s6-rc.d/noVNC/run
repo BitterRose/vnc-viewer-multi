@@ -3,6 +3,19 @@ set -e
 
 bashio::log.info 'Starting Multi VNC Proxy setup'
 
+# Log noVNC version info
+if [ -f "/noVNC/core/rfb.js" ]; then
+    NOVNC_HASH=$(head -20 /noVNC/core/rfb.js | grep -o 'commit\|modified\|updated' | head -1 || echo "unknown")
+    bashio::log.info "Using noVNC fork version: ${NOVNC_HASH}"
+    
+    # Check if our modification is present
+    if grep -q "insecureAllowed" /noVNC/core/rfb.js; then
+        bashio::log.info "✅ Custom insecure modification detected in rfb.js"
+    else
+        bashio::log.warning "❌ Custom insecure modification NOT found in rfb.js"
+    fi
+fi
+
 # Create web directories for each proxy
 mkdir -p /var/www
 
@@ -13,9 +26,16 @@ for server in $(bashio::config 'vnc_servers|keys'); do
     
     bashio::log.info "Setting up web files for ${name} on port ${proxy_port}"
     
-    # Create directory for this proxy
+    # Create directory for this proxy and clear any existing files
+    rm -rf "/var/www/port_${proxy_port}"
     mkdir -p "/var/www/port_${proxy_port}"
     cp -r /noVNC/* "/var/www/port_${proxy_port}/"
+    
+    # Add cache busting timestamp to HTML files
+    TIMESTAMP=$(date +%s)
+    find "/var/www/port_${proxy_port}" -name "*.html" -exec sed -i "s/<head>/<head><!-- Build: ${TIMESTAMP} -->/g" {} \;
+    
+    bashio::log.info "Copied noVNC files with timestamp ${TIMESTAMP}"
     
     # Configure noVNC settings for this specific server
     bashio::log.info "Configuring noVNC settings for ${name}"
@@ -38,7 +58,7 @@ for server in $(bashio::config 'vnc_servers|keys'); do
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true';
+        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true&insecure=true';
     </script>
 </head>
 <body>
@@ -54,7 +74,7 @@ EOF
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?scale=true&cursor=true';
+        window.location.href = 'vnc_lite.html?scale=true&cursor=true&insecure=true';
     </script>
 </head>
 <body>
@@ -79,6 +99,7 @@ start_proxy() {
     cd "/var/www/port_${proxy_port}"
     nohup /usr/local/bin/websockify \
         --web="/var/www/port_${proxy_port}" \
+        --verbose \
         "0.0.0.0:${proxy_port}" \
         "${host}:${port}" \
         > "/var/log/websockify_${proxy_port}.log" 2>&1 &
@@ -126,7 +147,7 @@ bashio::log.info "Monitoring proxy processes..."
 while true; do
     sleep 30
     
-    # Check if all proxies are still running
+    # Check if all proxies are still running and show their status
     for server in $(bashio::config 'vnc_servers|keys'); do
         proxy_port=$(bashio::config "vnc_servers[${server}].proxy_port")
         name=$(bashio::config "vnc_servers[${server}].name")
@@ -134,7 +155,12 @@ while true; do
         if [ -f "/var/run/websockify_${proxy_port}.pid" ]; then
             pid=$(cat "/var/run/websockify_${proxy_port}.pid")
             if ! kill -0 "$pid" 2>/dev/null; then
-                bashio::log.warning "Proxy for ${name} (port ${proxy_port}) died, restarting..."
+                bashio::log.warning "Proxy for ${name} (port ${proxy_port}) died, checking logs..."
+                if [ -f "/var/log/websockify_${proxy_port}.log" ]; then
+                    tail -5 "/var/log/websockify_${proxy_port}.log" | while read line; do
+                        bashio::log.warning "  LOG: $line"
+                    done
+                fi
                 rm -f "/var/run/websockify_${proxy_port}.pid"
                 start_proxy "$server"
             fi
