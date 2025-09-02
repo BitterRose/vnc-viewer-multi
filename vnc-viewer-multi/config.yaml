@@ -45,6 +45,6 @@ schema:
   vnc_servers:
     - name: str
       host: str
-      port: int(5900,65535)?
+      port: int(1,65535)?
       proxy_port: int(6080,6089)
       password: str?
