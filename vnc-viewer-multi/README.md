@@ -7,16 +7,17 @@
 ![Supports armv7 Architecture][armv7-badge]
 ![Supports i386 Architecture][i386-badge]
 
-Zaawansowany add-on do Home Assistant umożliwiający jednoczesny dostęp do wielu serwerów VNC. Każdy serwer VNC jest dostępny na osobnym porcie z pełnym interfejsem noVNC.
+Zaawansowany add-on do Home Assistant umożliwiający jednoczesny dostęp do wielu serwerów VNC. Każdy serwer VNC jest dostępny na osobnym porcie z pełnym interfejsem noVNC. Addon wykorzystuje zmodyfikowaną wersję noVNC z ulepszoną obsługą połączeń HTTP.
 
 ## Funkcje
 
 - 🖥️ **Obsługa wielu serwerów VNC** - Do 10 serwerów jednocześnie (porty 6080-6089)
 - 🌐 **Bezpośredni dostęp** - Każdy serwer na własnym porcie bez dodatkowego interfejsu
 - 🔐 **Automatyczne hasła** - Wstrzykiwanie haseł bezpośrednio do interfejsu noVNC
-- 📱 **Standardowy noVNC** - Pełna kompatybilność z oryginalnym interfejsem noVNC
+- 📱 **Zmodyfikowany noVNC** - Fork z poprawkami dla połączeń HTTP
 - 🔄 **Automatyczne monitorowanie** - Restartowanie proxy w przypadku awarii
 - ⚡ **Wysoka wydajność** - Bezpośrednie połączenia proxy bez dodatkowych warstw
+- 🔧 **Elastyczne porty** - Obsługa portów VNC 1-65535
 
 ## Instalacja
 
@@ -61,10 +62,15 @@ http://IP_HOME_ASSISTANT:PROXY_PORT/vnc.html
 http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_lite.html
 ```
 
+### Auto-login (dla serwerów z hasłem):
+```
+http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_auto.html
+```
+
 ### Przykłady URL:
-- Windows Desktop: `http://192.168.1.100:6080/vnc.html`
-- Linux Server: `http://192.168.1.100:6081/vnc.html`
-- MacBook: `http://192.168.1.100:6082/vnc_lite.html`
+- Windows Desktop: `http://192.168.1.100:6080/vnc_auto.html` (automatyczne logowanie)
+- Linux Server: `http://192.168.1.100:6081/vnc_lite.html`
+- MacBook: `http://192.168.1.100:6082/vnc_lite.html?password=mac456&insecure=true`
 
 ## Parametry konfiguracji
 
@@ -91,13 +97,17 @@ http://IP:PORT/vnc.html?autoconnect=true&resize=scale&quality=6
 - `resize=scale|remote` - Tryb skalowania ekranu
 - `quality=0-9` - Jakość kompresji (0=najlepsza jakość, 9=najszybsza)
 
+## Funkcje noVNC
+
+- **Automatyczne logowanie** - vnc_auto.html przekierowuje z hasłem
+- **Lekki interfejs** - vnc_lite.html dla podstawowych funkcji  
+- **Pełny interfejs** - vnc.html z wszystkimi opcjami
+- **Parametry URL** - dostosowywanie przez adres www
+- **Obsługa HTTP** - zmodyfikowany noVNC bez wymogu HTTPS
+
 ## Porty
 
 Add-on wykorzystuje porty **6080-6089** dla proxy serwerów VNC. Upewnij się, że te porty nie są używane przez inne usługi.
-
-## Monitorowanie
-
-Add-on automatycznie monitoruje wszystkie proxy i restartuje je w przypadku awarii. Wszystkie zdarzenia są rejestrowane w logach.
 
 ## Rozwiązywanie problemów
 
@@ -151,10 +161,10 @@ vnc_servers:
 ```
 
 Po tej konfiguracji będziesz mieć:
-- Gaming PC: `http://192.168.1.5:6080/vnc.html`
-- Work Laptop: `http://192.168.1.5:6081/vnc.html`  
-- Home Server: `http://192.168.1.5:6082/vnc.html`
-- Raspberry Pi: `http://192.168.1.5:6083/vnc.html`
+- Gaming PC: `http://192.168.1.5:6080/vnc_auto.html` (auto-login)
+- Work Laptop: `http://192.168.1.5:6081/vnc_lite.html`  
+- Home Server: `http://192.168.1.5:6082/vnc_auto.html` (auto-login)
+- Raspberry Pi: `http://192.168.1.5:6083/vnc_lite.html`
 
 [stage-badge]: https://img.shields.io/badge/Addon%20stage-stable-green.svg
 [aarch64-badge]: https://img.shields.io/badge/aarch64-yes-green.svg
