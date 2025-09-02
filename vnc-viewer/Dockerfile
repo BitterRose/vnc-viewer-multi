@@ -38,6 +38,9 @@ COPY --from=NO_VNC /noVNC /noVNC
 COPY --from=WEBSOCKIFY /usr/local/lib/python3.11/dist-packages/ /usr/local/lib/python3.11/dist-packages/
 COPY --from=WEBSOCKIFY /usr/local/bin/websockify /usr/local/bin/websockify
 
+# Expose ports for multiple VNC proxies
+EXPOSE 6080 6081 6082 6083 6084 6085 6086 6087 6088 6089
+
 ENTRYPOINT [ "/init" ]
 CMD []
 COPY root /

@@ -1,31 +1,102 @@
 #!/command/with-contenv bashio
 set -e
 
-bashio::log.info 'Set some defaults'
-sed -i "/UI.initSetting('show_dot'/ s/false/true/; /UI.initSetting('resize'/ s/off/scale/" /noVNC/app/ui.js
+bashio::log.info 'Starting Multi VNC Proxy setup'
 
-bashio::log.info 'Prepare noVNC for Home Assistant ingress'
-host_port=$(bashio::core.port)
-ingress_url=$(bashio::addon.ingress_entry)
+# Create web directories for each proxy
+mkdir -p /var/www
 
-sed -i "/UI.initSetting/ s@'websockify'@'${ingress_url:1}/websockify'@" /noVNC/app/ui.js
+# Copy noVNC files to each proxy port directory
+for server in $(bashio::config 'vnc_servers|keys'); do
+    proxy_port=$(bashio::config "vnc_servers[${server}].proxy_port")
+    name=$(bashio::config "vnc_servers[${server}].name")
+    
+    bashio::log.info "Setting up web files for ${name} on port ${proxy_port}"
+    
+    # Create directory for this proxy
+    mkdir -p "/var/www/port_${proxy_port}"
+    cp -r /noVNC/* "/var/www/port_${proxy_port}/"
+    
+    # Configure noVNC settings for this specific server
+    bashio::log.info "Configuring noVNC settings for ${name}"
+    sed -i "/UI.initSetting('show_dot'/ s/false/true/; /UI.initSetting('resize'/ s/off/scale/" "/var/www/port_${proxy_port}/app/ui.js"
+    
+    # Inject password if configured
+    if bashio::config.has_value "vnc_servers[${server}].password"; then
+        password=$(bashio::config "vnc_servers[${server}].password")
+        bashio::log.info "Injecting password for ${name}"
+        sed -i "s/WebUtil.getConfigVar('password');/'${password}';/" "/var/www/port_${proxy_port}/app/ui.js"
+    fi
+done
 
-if bashio::config.has_value 'vnc_server_password'; then
-    bashio::log.info 'Inject vnc connection password'
-    password=$(bashio::config 'vnc_server_password')
-    sed -i "s/WebUtil.getConfigVar('password');/'${password}';/" /noVNC/app/ui.js
-fi
+# Function to start websockify proxy for a server
+start_proxy() {
+    local server_key=$1
+    local name=$(bashio::config "vnc_servers[${server_key}].name")
+    local host=$(bashio::config "vnc_servers[${server_key}].host")
+    local port=$(bashio::config "vnc_servers[${server_key}].port" "5900")
+    local proxy_port=$(bashio::config "vnc_servers[${server_key}].proxy_port")
+    
+    bashio::log.info "Starting proxy for ${name}: ${host}:${port} -> 0.0.0.0:${proxy_port}"
+    
+    # Start websockify with web files
+    cd "/var/www/port_${proxy_port}"
+    /usr/local/bin/websockify \
+        --web="/var/www/port_${proxy_port}" \
+        --cert=false \
+        --ssl-only=false \
+        --daemon \
+        --pidfile="/var/run/websockify_${proxy_port}.pid" \
+        "${proxy_port}" \
+        "${host}:${port}" &
+    
+    local pid=$!
+    bashio::log.info "Started proxy for ${name} with PID ${pid}"
+}
 
-server_host=$(bashio::config 'vnc_server_host')
-server_port=5900
-if bashio::config.has_value 'vnc_server_port'; then
-    server_port=$(bashio::config 'vnc_server_port')
-fi
+# Start all proxies
+server_count=0
+for server in $(bashio::config 'vnc_servers|keys'); do
+    start_proxy "$server"
+    server_count=$((server_count + 1))
+    sleep 2  # Small delay between starting proxies
+done
 
-server="${server_host}:${server_port}"
+bashio::log.info "Started ${server_count} VNC proxies"
 
+# Log access information
+bashio::log.info "VNC Proxies are now available:"
+for server in $(bashio::config 'vnc_servers|keys'); do
+    name=$(bashio::config "vnc_servers[${server}].name")
+    host=$(bashio::config "vnc_servers[${server}].host")
+    port=$(bashio::config "vnc_servers[${server}].port" "5900")
+    proxy_port=$(bashio::config "vnc_servers[${server}].proxy_port")
+    
+    bashio::log.info "  ${name}: http://YOUR_HA_IP:${proxy_port}/vnc.html"
+    bashio::log.info "    or: http://YOUR_HA_IP:${proxy_port}/vnc_lite.html"
+    bashio::log.info "    Target: ${host}:${port}"
+done
 
-bashio::log.info 'Start noVNC'
-bashio::log.info "Connecting to VNC $server"
-# shellcheck disable=SC2086
-/noVNC/utils/novnc_proxy --listen 6080 --vnc $server
+# Keep the container running by monitoring the processes
+bashio::log.info "Monitoring proxy processes..."
+
+while true; do
+    sleep 30
+    
+    # Check if all proxies are still running
+    for server in $(bashio::config 'vnc_servers|keys'); do
+        proxy_port=$(bashio::config "vnc_servers[${server}].proxy_port")
+        name=$(bashio::config "vnc_servers[${server}].name")
+        
+        if [ -f "/var/run/websockify_${proxy_port}.pid" ]; then
+            pid=$(cat "/var/run/websockify_${proxy_port}.pid")
+            if ! kill -0 "$pid" 2>/dev/null; then
+                bashio::log.warning "Proxy for ${name} (port ${proxy_port}) died, restarting..."
+                start_proxy "$server"
+            fi
+        else
+            bashio::log.warning "PID file for ${name} (port ${proxy_port}) missing, restarting..."
+            start_proxy "$server"
+        fi
+    done
+done

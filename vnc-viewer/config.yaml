@@ -1,12 +1,9 @@
-name: VNC Viewer
+name: VNC Viewer Multi
 version: dev
-slug: vnc-viewer
+slug: vnc-viewer-multi
 panel_icon: mdi:remote-desktop
-description: A noVNC client integrated in Home Assistant
+description: Multiple VNC servers proxy for Home Assistant
 url: https://github.com/Poeschl-HomeAssistant-Addons/vnc-viewer
-ingress: true
-ingress_port: 6080
-ingress_entry: vnc.html?autoconnect=true
 arch:
   - armv7
   - armhf
@@ -16,9 +13,38 @@ arch:
 boot: manual
 hassio_api: true
 init: false
+ports:
+  6080/tcp: 6080
+  6081/tcp: 6081
+  6082/tcp: 6082
+  6083/tcp: 6083
+  6084/tcp: 6084
+  6085/tcp: 6085
+  6086/tcp: 6086
+  6087/tcp: 6087
+  6088/tcp: 6088
+  6089/tcp: 6089
+ports_description:
+  6080/tcp: "VNC Server 1"
+  6081/tcp: "VNC Server 2"  
+  6082/tcp: "VNC Server 3"
+  6083/tcp: "VNC Server 4"
+  6084/tcp: "VNC Server 5"
+  6085/tcp: "VNC Server 6"
+  6086/tcp: "VNC Server 7"
+  6087/tcp: "VNC Server 8"
+  6088/tcp: "VNC Server 9"
+  6089/tcp: "VNC Server 10"
 options:
-  vnc_server_host: localhost
+  vnc_servers:
+    - name: "Server 1"
+      host: localhost
+      port: 5900
+      proxy_port: 6080
 schema:
-  vnc_server_host: str
-  vnc_server_port: int?
-  vnc_server_password: str?
+  vnc_servers:
+    - name: str
+      host: str
+      port: int(5900,65535)?
+      proxy_port: int(6080,6089)
+      password: str?
