@@ -28,7 +28,7 @@ Lub ręcznie:
 
 1. Przejdź do **Settings** → **Add-ons** → **Add-on Store**
 2. Kliknij **⋮** → **Repositories**
-3. Dodaj: `https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon`
+3. Dodaj: `https://github.com/BitterRose/vnc-viewer-multi`
 
 ### 2. Zainstaluj add-on
 
@@ -178,8 +178,8 @@ vnc_servers:
 ## 🤝 Wsparcie
 
 - 📚 **Dokumentacja**: [DOCS.md](vnc-viewer-multi/DOCS.md)
-- 🐛 **Problemy**: [GitHub Issues](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/issues)
-- 💬 **Dyskusje**: [GitHub Discussions](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/discussions)
+- 🐛 **Problemy**: [GitHub Issues](https://github.com/BitterRose/vnc-viewer-multi/issues)
+- 💬 **Dyskusje**: [GitHub Discussions](https://github.com/BitterRose/vnc-viewer-multi/discussions)
 
 ## 📄 Licencja
 
@@ -196,7 +196,7 @@ Ten projekt jest licencjonowany na licencji Apache 2.0 - zobacz plik [LICENSE](L
 ⭐ **Jeśli ten add-on Ci pomógł, zostaw gwiazdkę na GitHub!**
 
 [repository-badge]: https://img.shields.io/badge/Add-repository-41BDF5?logo=home-assistant&style=for-the-badge
-[repository-url]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A//github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon
+[repository-url]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A//github.com/BitterRose/vnc-viewer-multi
 
 [aarch64-badge]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-badge]: https://img.shields.io/badge/amd64-yes-green.svg
