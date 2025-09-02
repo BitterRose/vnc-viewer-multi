@@ -43,11 +43,9 @@ start_proxy() {
     cd "/var/www/port_${proxy_port}"
     /usr/local/bin/websockify \
         --web="/var/www/port_${proxy_port}" \
-        --cert=false \
-        --ssl-only=false \
         --daemon \
         --pidfile="/var/run/websockify_${proxy_port}.pid" \
-        "${proxy_port}" \
+        "0.0.0.0:${proxy_port}" \
         "${host}:${port}" &
     
     local pid=$!
