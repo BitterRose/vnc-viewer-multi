@@ -7,37 +7,37 @@
 ![Supports armv7 Architecture][armv7-badge]
 ![Supports i386 Architecture][i386-badge]
 
-Repozytorium zawiera Home Assistant add-on umożliwiający dostęp do wielu serwerów VNC jednocześnie. Każdy serwer VNC jest dostępny na osobnym porcie bez potrzeby dodatkowego interfejsu graficznego.
+Home Assistant add-on repository enabling simultaneous access to multiple VNC servers. Each VNC server is accessible on a separate port without requiring an additional graphical interface. The add-on uses a modified version of noVNC with improved HTTP connection support.
 
-## ✨ Funkcje
+## ✨ Features
 
-- 🖥️ **Obsługa wielu serwerów VNC** - Do 10 serwerów jednocześnie
-- 🌐 **Bezpośredni dostęp** - Każdy serwer na osobnym porcie
-- 🔐 **Automatyczne hasła** - Wstrzykiwanie haseł do interfejsu
-- 📱 **Standardowy noVNC** - Pełna kompatybilność z noVNC
-- 🔄 **Automatyczne monitorowanie** - Restartowanie proxy w razie awarii
-- ⚡ **Wydajność** - Bezpośrednie połączenia proxy bez dodatkowych warstw
+- 🖥️ **Multiple VNC server support** - Up to 10 servers simultaneously
+- 🌐 **Direct access** - Each server on a separate port
+- 🔐 **Automatic passwords** - Password injection into interface
+- 📱 **Modified noVNC** - Fork with HTTP connection improvements
+- 🔄 **Automatic monitoring** - Proxy restart on failure
+- ⚡ **Performance** - Direct proxy connections without additional layers
 
-## 🚀 Szybki start
+## 🚀 Quick Start
 
-### 1. Dodaj repozytorium
+### 1. Add Repository
 
 [![Add repository on my Home Assistant][repository-badge]][repository-url]
 
-Lub ręcznie:
+Or manually:
 
-1. Przejdź do **Settings** → **Add-ons** → **Add-on Store**
-2. Kliknij **⋮** → **Repositories**
-3. Dodaj: `https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon`
+1. Go to **Settings** → **Add-ons** → **Add-on Store**
+2. Click **⋮** → **Repositories**
+3. Add: `https://github.com/BitterRose/vnc-viewer-multi`
 
-### 2. Zainstaluj add-on
+### 2. Install Add-on
 
-1. Znajdź **VNC Viewer Multi** w Add-on Store
-2. Kliknij **Install**
-3. Skonfiguruj serwery VNC w zakładce **Configuration**
-4. Uruchom add-on
+1. Find **VNC Viewer Multi** in Add-on Store
+2. Click **Install**
+3. Configure VNC servers in **Configuration** tab
+4. Start the add-on
 
-### 3. Przykład konfiguracji
+### 3. Example Configuration
 
 ```yaml
 vnc_servers:
@@ -45,7 +45,7 @@ vnc_servers:
     host: 192.168.1.50
     port: 5900
     proxy_port: 6080
-    password: "mojhaslo123"
+    password: "mypassword123"
     
   - name: "Linux Server"
     host: 192.168.1.51
@@ -59,96 +59,139 @@ vnc_servers:
     password: "mac456"
 ```
 
-### 4. Dostęp do serwerów
+### 4. Server Access
 
-Po konfiguracji każdy serwer będzie dostępny pod adresem:
+After configuration, each server will be accessible at:
 
-- **Windows Desktop**: `http://192.168.1.100:6080/vnc.html`
-- **Linux Server**: `http://192.168.1.100:6081/vnc.html`
-- **MacBook Pro**: `http://192.168.1.100:6082/vnc.html`
+- **Windows Desktop**: `http://192.168.1.100:6080/vnc_auto.html` ← **Auto-login**
+- **Linux Server**: `http://192.168.1.100:6081/vnc_lite.html`
+- **MacBook Pro**: `http://192.168.1.100:6082/vnc_auto.html` ← **Auto-login**
 
-## 📖 Dokumentacja
+## 📖 Documentation
 
-### Dostępne porty
+### Available Ports
 
-Add-on rezerwuje porty **6080-6089** dla proxy serwerów VNC.
+The add-on reserves ports **6080-6089** for VNC server proxies.
 
-### Interfejsy noVNC
+### noVNC Interfaces
 
-Dla każdego serwera dostępne są dwa interfejsy:
+Three interfaces are available for each server:
 
-- **Pełny interfejs**: `http://IP:PORT/vnc.html`
-- **Lekki interfejs**: `http://IP:PORT/vnc_lite.html`
+- **Auto-login**: `http://IP:PORT/vnc_auto.html` 
+  - Automatic login with password
+  - **Recommended for password-protected servers** - most convenient
+  - Automatic connection without clicking
+  
+- **Lite**: `http://IP:PORT/vnc_lite.html` 
+  - Minimalist interface
+  - **Recommended for servers without passwords** or when you need login control
+  - Faster and more efficient
+  
+- **Full**: `http://IP:PORT/vnc.html` 
+  - All noVNC features
+  - **For advanced users** needing full functionality
 
-### Parametry URL
+### URL Parameters
 
-Możesz dodać parametry dla automatycznej konfiguracji:
+You can customize noVNC behavior through URL parameters:
 
 ```
-http://IP:PORT/vnc.html?autoconnect=true&resize=scale&quality=6
+http://IP:PORT/vnc_lite.html?password=PASSWORD&insecure=true&scale=true&quality=6
 ```
 
-**Dostępne parametry:**
-- `autoconnect=true` - Automatyczne łączenie
-- `resize=scale|remote` - Tryb skalowania  
-- `quality=0-9` - Jakość kompresji (0=najlepsza, 9=najszybsza)
+**Available parameters:**
+- `password=PASSWORD` - Automatic login
+- `insecure=true` - Allow HTTP connections  
+- `scale=true` - Automatic scaling
+- `quality=0-9` - Compression quality (0=best quality, 9=fastest)
+- `cursor=true` - Show remote cursor
+- `view_only=true` - View only without control
 
-## ⚙️ Konfiguracja
+## ⚙️ Configuration
 
-### Parametry serwera VNC
+### VNC Server Parameters
 
-| Parametr | Typ | Wymagany | Domyślnie | Opis |
-|----------|-----|----------|-----------|------|
-| `name` | string | ✅ | - | Nazwa serwera (do identyfikacji) |
-| `host` | string | ✅ | - | IP lub hostname serwera VNC |
-| `port` | integer | ❌ | 5900 | Port serwera VNC |
-| `proxy_port` | integer | ✅ | - | Port proxy (6080-6089) |
-| `password` | string | ❌ | - | Hasło VNC (opcjonalne) |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | string | ✅ | - | Server name (for identification) |
+| `host` | string | ✅ | - | VNC server IP or hostname |
+| `port` | integer | ❌ | 5900 | VNC server port |
+| `proxy_port` | integer | ✅ | - | Proxy port (6080-6089) |
+| `password` | string | ❌ | - | VNC password (optional) |
 
-### Wymagania
+### Requirements
 
-- **Home Assistant OS** lub **Supervised**
-- **Serwery VNC** dostępne w sieci
-- **Porty 6080-6089** dostępne na hoście HA
+- **Home Assistant OS** or **Supervised**
+- **VNC servers** available on network
+- **Ports 6080-6089** available on HA host
 
-## 🔧 Rozwiązywanie problemów
+## 🔧 Troubleshooting
 
-### Nie mogę się połączyć z serwerem VNC
+### Can't connect to VNC server
 
-1. ✅ Sprawdź czy serwer VNC działa
-2. ✅ Upewnij się, że IP i port są poprawne  
-3. ✅ Sprawdź firewall na serwerze VNC
-4. ✅ Sprawdź logi add-on-a w HA
+1. ✅ Check add-on logs in HA  
+2. ✅ Ensure VNC server is running on target machine
+3. ✅ Check firewall on VNC server and Home Assistant
+4. ✅ Check websockify logs at `/var/log/websockify_XXXX.log`
 
-### Proxy się restartuje
+### Proxy restarts
 
-1. ✅ Sprawdź dostępność serwera VNC z HA
-2. ✅ Sprawdź logi pod kątem błędów sieciowych
-3. ✅ Upewnij się, że porty nie kolidują
+1. ✅ Check VNC server availability from Home Assistant
+2. ✅ Check logs for network errors
+3. ✅ Ensure host:port parameters are correct
 
-### Problemy z wydajnością
+### Performance issues
 
-1. ✅ Użyj parametru `?quality=9` dla szybszego połączenia
-2. ✅ Sprawdź obciążenie CPU Home Assistant
-3. ✅ Rozważ przewodowe połączenie sieciowe
+1. ✅ Use `?quality=9` parameter for fastest connection
+2. ✅ Check Home Assistant CPU load
+3. ✅ Consider wired network connection
+4. ✅ Use `vnc_lite.html` instead of full interface
 
-## 📝 Przykłady użycia
+## 📋 Recommended Usage
 
-### Domowe biuro
+### 🏆 **Best Experience:**
+1. **For password-protected servers**: Use `vnc_auto.html` 
+   ```
+   http://192.168.1.100:6080/vnc_auto.html
+   ```
+   
+2. **For servers without passwords**: Use `vnc_lite.html`
+   ```
+   http://192.168.1.100:6080/vnc_lite.html?insecure=true
+   ```
+
+3. **For advanced features**: Use full interface
+   ```
+   http://192.168.1.100:6080/vnc.html
+   ```
+
+### ⚡ **Performance Tips:**
+- `vnc_lite.html` is faster than full interface
+- `vnc_auto.html` connects automatically without clicking
+- Add `?quality=9` for fastest connection
+- Use `?scale=true` for automatic fitting
+
+## 📝 Configuration Examples
+
+### Home Office
 
 ```yaml
 vnc_servers:
-  - name: "PC Gaming"
+  - name: "Gaming PC"
     host: 192.168.1.100
     proxy_port: 6080
     password: "gaming123"
     
-  - name: "Laptop Work"  
+  - name: "Work Laptop"  
     host: 192.168.1.101
     proxy_port: 6081
 ```
 
-### Serwery produkcyjne
+**Access:**
+- Gaming PC: `http://HA_IP:6080/vnc_auto.html` (auto-login)
+- Work Laptop: `http://HA_IP:6081/vnc_lite.html` (no password)
+
+### Production Servers
 
 ```yaml
 vnc_servers:
@@ -156,6 +199,7 @@ vnc_servers:
     host: 10.0.0.10
     port: 5901
     proxy_port: 6080
+    password: "webserver123"
     
   - name: "Database Server"
     host: 10.0.0.11  
@@ -168,35 +212,41 @@ vnc_servers:
     proxy_port: 6082
 ```
 
-## 🛡️ Bezpieczeństwo
+**Access:**
+- Web Server: `http://HA_IP:6080/vnc_auto.html` (auto-login)
+- Database: `http://HA_IP:6081/vnc_auto.html` (auto-login)  
+- Monitoring: `http://HA_IP:6082/vnc_lite.html` (no password)
 
-- 🔐 **Hasła** są wstrzykiwane bezpiecznie do interfejsu
-- 🌐 **Proxy lokalne** - ruch nie opuszcza sieci domowej
-- 🚪 **Kontrola portów** - tylko skonfigurowane porty są otwarte
-- 📊 **Monitorowanie** - automatyczne wykrywanie problemów
+## 🛡️ Security
 
-## 🤝 Wsparcie
+- 🔐 **Passwords** are securely passed through URL parameters
+- 🌐 **Local proxies** - traffic doesn't leave home network
+- 🚪 **Port control** - only configured ports are open
+- 📊 **Monitoring** - automatic proxy problem detection
+- 🛡️ **Modified noVNC** - security fixes for HTTP connections
 
-- 📚 **Dokumentacja**: [DOCS.md](vnc-viewer-multi/DOCS.md)
-- 🐛 **Problemy**: [GitHub Issues](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/issues)
-- 💬 **Dyskusje**: [GitHub Discussions](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/discussions)
+## 🤝 Support
 
-## 📄 Licencja
+- 📚 **Documentation**: [DOCS.md](vnc-viewer-multi/DOCS.md)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/BitterRose/vnc-viewer-multi/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/BitterRose/vnc-viewer-multi/discussions)
 
-Ten projekt jest licencjonowany na licencji Apache 2.0 - zobacz plik [LICENSE](LICENSE) dla szczegółów.
+## 📄 License
 
-## 🙏 Podziękowania
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
 
 - [noVNC](https://github.com/novnc/noVNC) - Web VNC client
-- [noVNC-BitterRose](https://github.com/BitterRose/noVNC-BitterRose) - Zmodyfikowana wersja noVNC
+- [noVNC-BitterRose](https://github.com/BitterRose/noVNC-BitterRose) - Modified noVNC version
 - [websockify](https://github.com/novnc/websockify) - WebSocket proxy
-- [Home Assistant](https://www.home-assistant.io/) - Platforma automatyzacji domu
+- [Home Assistant](https://www.home-assistant.io/) - Home automation platform
 
 ---
 
-⭐ **Jeśli ten add-on Ci pomógł, zostaw gwiazdkę na GitHub!**
+⭐ **If this add-on helped you, leave a star on GitHub!**
 
-💡 **Wskazówka:** Dla najlepszego doświadczenia użyj `vnc_auto.html` - automatycznie zaloguje się i połączy z serwerem VNC!
+💡 **Tip:** For the best experience, use `vnc_auto.html` - it will automatically log in and connect to the VNC server!
 
 [repository-badge]: https://img.shields.io/badge/Add-repository-41BDF5?logo=home-assistant&style=for-the-badge
 [repository-url]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A//github.com/BitterRose/vnc-viewer-multi

@@ -1,21 +1,21 @@
-# VNC Viewer Multi Proxy - Dokumentacja
+# VNC Viewer Multi Proxy - Documentation
 
-## Opis
+## Overview
 
-Ten addon tworzy osobne proxy dla każdego skonfigurowanego serwera VNC, umożliwiając bezpośredni dostęp do każdego serwera na osobnym porcie bez dodatkowego interfejsu graficznego. Addon używa zmodyfikowanej wersji noVNC z ulepszoną obsługą połączeń niezabezpieczonych.
+This add-on creates separate proxies for each configured VNC server, enabling direct access to each server on a separate port without additional graphical interface. The add-on uses a modified version of noVNC with improved support for insecure connections.
 
-## Konfiguracja
+## Configuration
 
-Przykład konfiguracji z wieloma serwerami VNC:
+Example configuration with multiple VNC servers:
 
 ```yaml
 vnc_servers:
-  - name: "Komputer biurowy"
+  - name: "Office Computer"
     host: 192.168.0.23
     port: 5900
     proxy_port: 6080
-    password: "mojhaslo123"
-  - name: "Serwer produkcyjny"
+    password: "mypassword123"
+  - name: "Production Server"
     host: 10.0.0.15
     port: 5901
     proxy_port: 6081
@@ -31,246 +31,245 @@ vnc_servers:
     password: "windows123"
 ```
 
-## Parametry konfiguracji
+## Configuration Parameters
 
-### `vnc_servers` (Wymagany)
+### `vnc_servers` (Required)
 
-Lista serwerów VNC. Każdy serwer wymaga następujących parametrów:
+List of VNC servers. Each server requires the following parameters:
 
-#### `name` (Wymagany)
-- **Typ**: string
-- **Opis**: Przyjazna nazwa serwera do identyfikacji w logach i interfejsie
+#### `name` (Required)
+- **Type**: string
+- **Description**: Friendly server name for identification in logs and interface
 
-#### `host` (Wymagany)  
-- **Typ**: string
-- **Opis**: Adres IP lub nazwa hosta serwera VNC
-- **Przykłady**: `192.168.1.100`, `vnc-server.local`, `10.0.0.50`
+#### `host` (Required)  
+- **Type**: string
+- **Description**: IP address or hostname of the VNC server
+- **Examples**: `192.168.1.100`, `vnc-server.local`, `10.0.0.50`
 
-#### `port` (Opcjonalny)
-- **Typ**: integer (1-65535)
-- **Domyślnie**: 5900
-- **Opis**: Port na którym działa serwer VNC
-- **Typowe porty**: 5900 (standardowy), 5901, 5902, 5600, itp.
+#### `port` (Optional)
+- **Type**: integer (1-65535)
+- **Default**: 5900
+- **Description**: Port on which the VNC server is running
+- **Common ports**: 5900 (standard), 5901, 5902, 5600, etc.
 
-#### `proxy_port` (Wymagany)
-- **Typ**: integer (6080-6089)
-- **Opis**: Port na którym będzie dostępny proxy dla tego serwera VNC
-- **Uwaga**: Każdy serwer musi mieć unikalny proxy_port
-- **Dostępne porty**: 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089
+#### `proxy_port` (Required)
+- **Type**: integer (6080-6089)
+- **Description**: Port on which the proxy for this VNC server will be available
+- **Note**: Each server must have a unique proxy_port
+- **Available ports**: 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089
 
-#### `password` (Opcjonalny)
-- **Typ**: string  
-- **Opis**: Hasło do serwera VNC
-- **Uwaga**: Jeśli nie zostanie ustawione, będzie pytać o hasło podczas łączenia
-- **Bezpieczeństwo**: Hasło może zawierać cyfry, litery i znaki specjalne
+#### `password` (Optional)
+- **Type**: string  
+- **Description**: VNC server password
+- **Note**: If not set, will prompt for password during connection
+- **Security**: Password can contain digits, letters, and special characters
 
-## Dostępne porty proxy
+## Available Proxy Ports
 
-Addon rezerwuje porty **6080-6089** dla proxy serwerów VNC. Możesz skonfigurować maksymalnie **10 serwerów VNC** jednocześnie.
+The add-on reserves ports **6080-6089** for VNC server proxies. You can configure a maximum of **10 VNC servers** simultaneously.
 
-## Użytkowanie
+## Usage
 
-Po skonfigurowaniu addon-a, każdy serwer VNC będzie dostępny pod trzema różnymi adresami:
+After configuring the add-on, each VNC server will be accessible at three different addresses:
 
-### 1. **Auto-login** (Zalecany dla serwerów z hasłem)
+### 1. **Auto-login** (Recommended for password-protected servers)
 ```
-http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_auto.html
+http://HOME_ASSISTANT_IP:PROXY_PORT/vnc_auto.html
 ```
-- Automatyczne przekierowanie z hasłem
-- Najwygodniejszy sposób dostępu
-- Automatyczne łączenie po załadowaniu
+- Automatic redirect with password
+- Most convenient access method
+- Automatic connection after loading
 
-### 2. **Lekki interfejs noVNC**
+### 2. **Lite noVNC interface**
 ```
-http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_lite.html
-```
-
-**Z hasłem:**
-```
-http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_lite.html?password=HASŁO&insecure=true
+http://HOME_ASSISTANT_IP:PROXY_PORT/vnc_lite.html
 ```
 
-**Bez hasła (zostaniesz poproszony):**
+**With password:**
 ```
-http://IP_HOME_ASSISTANT:PROXY_PORT/vnc_lite.html?insecure=true
-```
-
-### 3. **Pełny interfejs noVNC**
-```
-http://IP_HOME_ASSISTANT:PROXY_PORT/vnc.html
+http://HOME_ASSISTANT_IP:PROXY_PORT/vnc_lite.html?password=PASSWORD&insecure=true
 ```
 
-### Przykłady rzeczywistych adresów:
-Jeśli Twój Home Assistant ma IP `192.168.1.100`:
+**Without password (will prompt):**
+```
+http://HOME_ASSISTANT_IP:PROXY_PORT/vnc_lite.html?insecure=true
+```
+
+### 3. **Full noVNC interface**
+```
+http://HOME_ASSISTANT_IP:PROXY_PORT/vnc.html
+```
+
+### Real address examples:
+If your Home Assistant has IP `192.168.1.100`:
 
 - **Windows PC**: `http://192.168.1.100:6083/vnc_auto.html`
 - **Raspberry Pi**: `http://192.168.1.100:6082/vnc_lite.html?password=raspberry&insecure=true`
-- **Serwer**: `http://192.168.1.100:6081/vnc.html`
+- **Server**: `http://192.168.1.100:6081/vnc.html`
 
-## Parametry URL (opcjonalne)
+## URL Parameters (Optional)
 
-Możesz dostosować zachowanie noVNC przez parametry URL:
+You can customize noVNC behavior through URL parameters:
 
 ```
-http://IP:PORT/vnc_lite.html?password=HASŁO&scale=true&cursor=true&insecure=true&quality=6
+http://IP:PORT/vnc_lite.html?password=PASSWORD&scale=true&cursor=true&insecure=true&quality=6
 ```
 
-**Dostępne parametry:**
-- `password=HASŁO` - Automatyczne logowanie
-- `insecure=true` - Zezwala na niezabezpieczone połączenia HTTP
-- `scale=true` - Automatyczne skalowanie ekranu
-- `cursor=true` - Pokazuj kursor zdalny
-- `view_only=true` - Tylko podgląd (bez kontroli)
-- `quality=0-9` - Jakość kompresji (0=najlepsza jakość, 9=najszybsza)
+**Available parameters:**
+- `password=PASSWORD` - Automatic login
+- `insecure=true` - Allow insecure HTTP connections
+- `scale=true` - Automatic screen scaling
+- `cursor=true` - Show remote cursor
+- `view_only=true` - View only (no control)
+- `quality=0-9` - Compression quality (0=best quality, 9=fastest)
 
-## Funkcje
+## Features
 
-- ✅ **Obsługa wielu serwerów VNC** - Do 10 serwerów jednocześnie
-- ✅ **Bezpośredni dostęp** - Każdy serwer na własnym porcie  
-- ✅ **Automatyczne hasła** - Wstrzykiwanie haseł do interfejsu
-- ✅ **Zmodyfikowany noVNC** - Ulepszona obsługa połączeń HTTP
-- ✅ **Elastyczne porty VNC** - Obsługa portów 1-65535
-- ✅ **Automatyczne monitorowanie** - Restartowanie proxy w przypadku awarii
-- ✅ **Testy połączenia** - Automatyczne sprawdzanie dostępności serwerów
-- ✅ **Szczegółowe logi** - Diagnostyka problemów z połączeniem
+- ✅ **Multiple VNC server support** - Up to 10 servers simultaneously
+- ✅ **Direct access** - Each server on its own port  
+- ✅ **Automatic passwords** - Password injection into interface
+- ✅ **Modified noVNC** - Improved HTTP connection support
+- ✅ **Flexible VNC ports** - Support for ports 1-65535
+- ✅ **Automatic monitoring** - Proxy restart on failure
+- ✅ **Detailed logs** - Connection problem diagnostics
 
-## Monitorowanie i diagnostyka
+## Monitoring and Diagnostics
 
-### Logi addon-a
-Addon automatycznie:
-- Monitoruje wszystkie proxy co 30 sekund
-- Restartuje proxy w przypadku awarii
-- Zapisuje szczegółowe logi websockify
+### Add-on logs
+The add-on automatically:
+- Monitors all proxies every 30 seconds
+- Restarts proxies on failure
+- Saves detailed websockify logs
 
-### Interpretacja logów
-Addon pokazuje informacje o dostępnych proxy i ich adresach URL.
+### Log interpretation
+The add-on shows information about available proxies and their URLs.
 
-### Lokalizacja logów websockify
-Szczegółowe logi dla każdego proxy:
+### Websockify log location
+Detailed logs for each proxy:
 ```
-/var/log/websockify_6080.log  # dla proxy_port 6080
-/var/log/websockify_6081.log  # dla proxy_port 6081
+/var/log/websockify_6080.log  # for proxy_port 6080
+/var/log/websockify_6081.log  # for proxy_port 6081
 ```
 
-## Rozwiązywanie problemów
+## Troubleshooting
 
-### Nie mogę się połączyć z proxy
-1. **Sprawdź logi addon-a** w Home Assistant
-2. **Upewnij się**, że port proxy nie jest używany przez inną usługę  
-3. **Sprawdź firewall** Home Assistant
-4. **Sprawdź logi websockify** w `/var/log/websockify_XXXX.log`
+### Can't connect to proxy
+1. **Check add-on logs** in Home Assistant
+2. **Ensure** proxy port is not used by another service  
+3. **Check firewall** on Home Assistant
+4. **Check websockify logs** at `/var/log/websockify_XXXX.log`
 
-### Problemy z połączeniem VNC
-**Możliwe przyczyny:**
-- Serwer VNC nie działa na docelowej maszynie
-- Firewall blokuje port VNC
-- Nieprawidłowy IP lub port w konfiguracji
-- Sieć nie pozwala na połączenia między maszynami
+### VNC connection problems
+**Possible causes:**
+- VNC server not running on target machine
+- Firewall blocking VNC port
+- Incorrect IP or port in configuration
+- Network doesn't allow connections between machines
 
-**Jak sprawdzić (Windows PowerShell):**
+**How to check (Windows PowerShell):**
 ```powershell
 Test-NetConnection -ComputerName 192.168.1.100 -Port 5900
 ```
 
-**Jak sprawdzić (Linux/Mac):**
+**How to check (Linux/Mac):**
 ```bash
 nc -z 192.168.1.100 5900
-# lub
+# or
 telnet 192.168.1.100 5900
 ```
 
-### Proxy się restartuje
-1. **Sprawdź dostępność serwera VNC** z Home Assistant
-2. **Sprawdź logi websockify** - addon pokaże ostatnie 5 linii przy restarcie
-3. **Upewnij się**, że parametry host:port są poprawne w konfiguracji
-4. **Sprawdź stabilność sieci** między HA a serwerem VNC
+### Proxy restarts
+1. ✅ Check VNC server availability from HA
+2. ✅ Check logs for network errors
+3. ✅ Ensure host:port parameters are correct in configuration
+4. ✅ Check network stability between HA and VNC server
 
-### Problemy z hasłem
-1. **Użyj vnc_auto.html** dla automatycznego logowania
-2. **Sprawdź czy hasło** nie zawiera problemowych znaków (`, ", ', &)
-3. **Spróbuj bez hasła** - może serwer VNC ma inne ustawienia
-4. **Sprawdź konfigurację VNC** na docelowej maszynie
+### Password problems
+1. ✅ Use `vnc_auto.html` for automatic login
+2. ✅ Check if password doesn't contain problematic characters (`, ", ', &)
+3. ✅ Try without password - maybe VNC server has different settings
+4. ✅ Check VNC configuration on target machine
 
-### Problemy z wydajnością
-1. **Zmniejsz jakość kompresji** dodając `?quality=9` do URL
-2. **Sprawdź obciążenie CPU** Home Assistant
-3. **Użyj przewodowego połączenia** zamiast Wi-Fi
-4. **Ogranicz liczbę jednoczesnych połączeń**
+### Performance issues
+1. ✅ Reduce compression quality by adding `?quality=9` to URL
+2. ✅ Check Home Assistant CPU load
+3. ✅ Use wired connection instead of Wi-Fi
+4. ✅ Limit number of simultaneous connections
 
 ### "noVNC requires a secure context (TLS)" 
-Ten addon używa zmodyfikowanego noVNC który rozwiązuje ten problem:
-1. **Używaj parametru insecure=true** w URL
-2. **vnc_auto.html już zawiera** ten parametr
-3. **Ostrzeżenie jest pominięte** w logach przeglądarki
+This add-on uses modified noVNC that solves this problem:
+1. **Use insecure=true parameter** in URL
+2. **vnc_auto.html already contains** this parameter
+3. **Warning is skipped** in browser logs
 
-## Konfiguracja serwerów VNC
+## VNC Server Configuration
 
 ### Windows
 - **TightVNC**, **UltraVNC**, **RealVNC**
-- Standardowy port: **5900**
-- Sprawdź firewall: **Windows Defender Firewall**
+- Standard port: **5900**
+- Check firewall: **Windows Defender Firewall**
 
 ### Linux  
 - **x11vnc**, **TigerVNC**, **RealVNC**
-- Standardowy port: **5900**
-- Sprawdź: `sudo netstat -tlnp | grep :5900`
+- Standard port: **5900**
+- Check: `sudo netstat -tlnp | grep :5900`
 
 ### macOS
-- **Screen Sharing** (wbudowany)
-- Standardowy port: **5900**  
-- Włącz: **System Preferences** → **Sharing** → **Screen Sharing**
+- **Screen Sharing** (built-in)
+- Standard port: **5900**  
+- Enable: **System Preferences** → **Sharing** → **Screen Sharing**
 
 ### Raspberry Pi
-- **RealVNC** (domyślnie w Raspberry Pi OS)
-- Standardowy port: **5900**
-- Włącz: `sudo raspi-config` → **Interfacing Options** → **VNC**
+- **RealVNC** (default in Raspberry Pi OS)
+- Standard port: **5900**
+- Enable: `sudo raspi-config` → **Interfacing Options** → **VNC**
 
-## Bezpieczeństwo
+## Security
 
-### Zalecenia
-- 🔐 **Używaj haseł VNC** dla wszystkich serwerów
-- 🌐 **Ogranicz dostęp** do sieci lokalnej  
-- 🔒 **Nie eksponuj portów** 6080-6089 na internet
-- 📊 **Monitoruj logi** pod kątem nieautoryzowanych prób dostępu
+### Recommendations
+- 🔐 **Use VNC passwords** for all servers
+- 🌐 **Restrict access** to local network  
+- 🔒 **Don't expose ports** 6080-6089 to internet
+- 📊 **Monitor logs** for unauthorized access attempts
 
-### Informacje o bezpieczeństwie
-- Hasła są przekazywane bezpiecznie przez parametry URL
-- Proxy działa lokalnie w kontenerze Home Assistant
-- Ruch VNC nie opuszcza sieci lokalnej
-- Automatyczne monitorowanie wykrywa problemy z połączeniami
+### Security information
+- Passwords are securely passed through URL parameters
+- Proxy runs locally in Home Assistant container
+- VNC traffic doesn't leave local network
+- Automatic monitoring detects connection problems
 
-## Przykład zaawansowanej konfiguracji
+## Advanced Configuration Example
 
 ```yaml
 vnc_servers:
-  # Serwer Windows z RealVNC
+  # Windows server with RealVNC
   - name: "Windows Desktop"
     host: 192.168.1.100  
     port: 5900
     proxy_port: 6080
     password: "secure123"
     
-  # Linux serwer z niestandardowym portem
+  # Linux server with custom port
   - name: "Ubuntu Server"
     host: 192.168.1.101
     port: 5901
     proxy_port: 6081
     password: "linux_vnc"
     
-  # Raspberry Pi z domyślnymi ustawieniami
+  # Raspberry Pi with default settings
   - name: "Raspberry Pi 4"
     host: 192.168.1.200
     port: 5900  
     proxy_port: 6082
     password: "raspberry"
     
-  # Maszyna wirtualna VMware
+  # VMware virtual machine
   - name: "VM Test Environment"  
     host: 192.168.1.150
     port: 5902
     proxy_port: 6083
     
-  # macOS z Screen Sharing
+  # macOS with Screen Sharing
   - name: "MacBook Pro"
     host: 192.168.1.120
     port: 5900
@@ -278,30 +277,30 @@ vnc_servers:
     password: "mac_screen"
 ```
 
-### Dostęp po konfiguracji:
+### Access after configuration:
 - **Windows Desktop**: `http://192.168.1.5:6080/vnc_auto.html`
 - **Ubuntu Server**: `http://192.168.1.5:6081/vnc_auto.html`
 - **Raspberry Pi**: `http://192.168.1.5:6082/vnc_auto.html`
-- **VM Test**: `http://192.168.1.5:6083/vnc_lite.html` (bez hasła)
+- **VM Test**: `http://192.168.1.5:6083/vnc_lite.html` (no password)
 - **MacBook Pro**: `http://192.168.1.5:6084/vnc_auto.html`
 
 ## FAQ
 
-### Q: Czy mogę używać więcej niż 10 serwerów VNC?
-**A:** Nie, addon obsługuje maksymalnie 10 serwerów (porty 6080-6089). To ograniczenie można zmienić modyfikując kod.
+### Q: Can I use more than 10 VNC servers?
+**A:** No, the add-on supports a maximum of 10 servers (ports 6080-6089). This limitation can be changed by modifying the code.
 
-### Q: Czy addon działa z VNC przez internet?
-**A:** Tak, ale **nie jest zalecane** ze względów bezpieczeństwa. Używaj VPN lub tuneli SSH.
+### Q: Does the add-on work with VNC over internet?
+**A:** Yes, but **not recommended** for security reasons. Use VPN or SSH tunnels.
 
-### Q: Dlaczego widzę ostrzeżenie o TLS?
-**A:** Addon używa zmodyfikowanego noVNC który pomija to ostrzeżenie. Używaj parametru `insecure=true`.
+### Q: Why do I see a TLS warning?
+**A:** The add-on uses modified noVNC that skips this warning. Use the `insecure=true` parameter.
 
-### Q: Czy mogę zmienić domyślne porty 6080-6089?
-**A:** Obecnie nie, ale możesz zmodyfikować kod w `config.yaml` i skrypcie uruchomieniowym.
+### Q: Can I change the default ports 6080-6089?
+**A:** Currently no, but you can modify the code in `config.yaml` and startup script.
 
-### Q: Jak zrestartować konkretny proxy?
-**A:** Proxy są automatycznie restartowane przy problemach. Możesz też zrestartować cały addon.
+### Q: How do I restart a specific proxy?
+**A:** Proxies are automatically restarted on problems. You can also restart the entire add-on.
 
 ---
 
-**💡 Wskazówka:** Dla najlepszego doświadczenia użyj `vnc_auto.html` - automatycznie zaloguje się i połączy z serwerem VNC!
+**💡 Tip:** For the best experience, use `vnc_auto.html` - it will automatically log in and connect to the VNC server!
