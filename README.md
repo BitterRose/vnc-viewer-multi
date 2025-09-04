@@ -28,7 +28,7 @@ Lub ręcznie:
 
 1. Przejdź do **Settings** → **Add-ons** → **Add-on Store**
 2. Kliknij **⋮** → **Repositories**
-3. Dodaj: `https://github.com/BitterRose/vnc-viewer-multi`
+3. Dodaj: `https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon`
 
 ### 2. Zainstaluj add-on
 
@@ -178,8 +178,8 @@ vnc_servers:
 ## 🤝 Wsparcie
 
 - 📚 **Dokumentacja**: [DOCS.md](vnc-viewer-multi/DOCS.md)
-- 🐛 **Problemy**: [GitHub Issues](https://github.com/BitterRose/vnc-viewer-multi/issues)
-- 💬 **Dyskusje**: [GitHub Discussions](https://github.com/BitterRose/vnc-viewer-multi/discussions)
+- 🐛 **Problemy**: [GitHub Issues](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/issues)
+- 💬 **Dyskusje**: [GitHub Discussions](https://github.com/TWOJA_NAZWA_UZYTKOWNIKA/ha-vnc-multi-addon/discussions)
 
 ## 📄 Licencja
 
@@ -188,12 +188,15 @@ Ten projekt jest licencjonowany na licencji Apache 2.0 - zobacz plik [LICENSE](L
 ## 🙏 Podziękowania
 
 - [noVNC](https://github.com/novnc/noVNC) - Web VNC client
+- [noVNC-BitterRose](https://github.com/BitterRose/noVNC-BitterRose) - Zmodyfikowana wersja noVNC
 - [websockify](https://github.com/novnc/websockify) - WebSocket proxy
 - [Home Assistant](https://www.home-assistant.io/) - Platforma automatyzacji domu
 
 ---
 
 ⭐ **Jeśli ten add-on Ci pomógł, zostaw gwiazdkę na GitHub!**
+
+💡 **Wskazówka:** Dla najlepszego doświadczenia użyj `vnc_auto.html` - automatycznie zaloguje się i połączy z serwerem VNC!
 
 [repository-badge]: https://img.shields.io/badge/Add-repository-41BDF5?logo=home-assistant&style=for-the-badge
 [repository-url]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A//github.com/BitterRose/vnc-viewer-multi
