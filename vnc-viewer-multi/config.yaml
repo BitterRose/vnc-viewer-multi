@@ -1,5 +1,5 @@
 name: VNC Viewer Multi
-version: 1.0.9
+version: 1.1.0
 slug: vnc-viewer-multi
 panel_icon: mdi:remote-desktop
 description: Multiple VNC servers proxy for Home Assistant
@@ -48,3 +48,5 @@ schema:
       port: int(1,65535)?
       proxy_port: int(6080,6089)
       password: str?
+      logo: str?
+  offline_text: str?

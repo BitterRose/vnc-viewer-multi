@@ -13,13 +13,14 @@ RUN apk add --no-cache \
     procps \
     bash
 
-# Clone your custom noVNC fork - add timestamp to prevent Docker cache
-RUN TIMESTAMP=$(date +%s) && \
-    echo "Build timestamp: $TIMESTAMP" && \
-    git config --global advice.detachedHead false && \
+# Custom noVNC fork, pinned to a commit so a push to the fork doesn't reach
+# installs until the add-on version is bumped
+ARG NOVNC_COMMIT=21019bfb36bfe24ad35bf86a2d59bcfee6715a64
+RUN git config --global advice.detachedHead false && \
     rm -rf /noVNC && \
     git clone https://github.com/BitterRose/noVNC-BitterRose.git /noVNC && \
     cd /noVNC && \
+    git checkout "${NOVNC_COMMIT}" && \
     echo "noVNC-BitterRose commit: $(git rev-parse --short HEAD) - $(date)" && \
     echo "noVNC-BitterRose date: $(git log -1 --format=%cd --date=short)"
 

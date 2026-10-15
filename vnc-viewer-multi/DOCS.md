@@ -15,6 +15,7 @@ vnc_servers:
     port: 5900
     proxy_port: 6080
     password: "mypassword123"
+    logo: "http://192.168.0.10:8123/local/logo/office.png"
   - name: "Production Server"
     host: 10.0.0.15
     port: 5901
@@ -63,6 +64,22 @@ List of VNC servers. Each server requires the following parameters:
 - **Description**: VNC server password
 - **Note**: If not set, will prompt for password during connection
 - **Security**: Password can contain digits, letters, and special characters
+
+#### `logo` (Optional)
+- **Type**: string (URL)
+- **Description**: Image shown in `vnc_auto.html` while there is no connection to this server. Without it the server name is shown.
+- **Example**: `http://192.168.1.5:8123/local/logo/office.png`
+
+### `offline_text` (Optional)
+- **Type**: string
+- **Default**: `No connection`
+- **Description**: Text shown in `vnc_auto.html` while there is no connection to a server
+
+## Connection loss
+
+`vnc_auto.html` covers the screen with the server's logo (or name) and `offline_text` when the connection fails or drops, and reconnects on its own (after 5, 10, 20, then every 30 seconds). A connection attempt that takes longer than 10 seconds counts as failed.
+
+When a server hides its own cursor (common on touch panels), a white arrow with a black outline is shown instead.
 
 ## Available Proxy Ports
 

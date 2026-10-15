@@ -16,6 +16,11 @@ if [ -f "/noVNC/core/rfb.js" ]; then
     fi
 fi
 
+# Percent-encode a value for use in a URL query string
+urlencode() {
+    jq -rn --arg v "$1" '$v|@uri'
+}
+
 # Create web directories for each proxy
 mkdir -p /var/www
 
@@ -45,7 +50,16 @@ for server in $(bashio::config 'vnc_servers|keys'); do
     
     # For vnc_lite.html - no modification needed, it uses URL parameters
     bashio::log.info "vnc_lite.html will use URL parameters for configuration"
-    
+
+    # Name, logo and text for the "no connection" panel in vnc_lite.html
+    offline_params="&name=$(urlencode "${name}")"
+    if bashio::config.has_value "vnc_servers[${server}].logo"; then
+        offline_params+="&logo=$(urlencode "$(bashio::config "vnc_servers[${server}].logo")")"
+    fi
+    if bashio::config.has_value 'offline_text'; then
+        offline_params+="&offline_text=$(urlencode "$(bashio::config 'offline_text')")"
+    fi
+
     # Create a redirect page with auto-login for convenience
     if bashio::config.has_value "vnc_servers[${server}].password"; then
         password=$(bashio::config "vnc_servers[${server}].password")
@@ -58,7 +72,7 @@ for server in $(bashio::config 'vnc_servers|keys'); do
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true&insecure=true';
+        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true&insecure=true${offline_params}';
     </script>
 </head>
 <body>
@@ -74,7 +88,7 @@ EOF
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?scale=true&cursor=true&insecure=true';
+        window.location.href = 'vnc_lite.html?scale=true&cursor=true&insecure=true${offline_params}';
     </script>
 </head>
 <body>
