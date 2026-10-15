@@ -21,6 +21,13 @@ urlencode() {
     jq -rn --arg v "$1" '$v|@uri'
 }
 
+# Cursor in vnc_lite.html: "true" = arrow only where the server hides its
+# cursor, "always" = the same arrow on every server
+cursor_mode=true
+if bashio::config.true 'force_cursor'; then
+    cursor_mode=always
+fi
+
 # Create web directories for each proxy
 mkdir -p /var/www
 
@@ -72,7 +79,7 @@ for server in $(bashio::config 'vnc_servers|keys'); do
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=true&insecure=true${offline_params}';
+        window.location.href = 'vnc_lite.html?password=${password}&scale=true&cursor=${cursor_mode}&insecure=true${offline_params}';
     </script>
 </head>
 <body>
@@ -88,7 +95,7 @@ EOF
 <head>
     <title>Auto-connecting to ${name}...</title>
     <script>
-        window.location.href = 'vnc_lite.html?scale=true&cursor=true&insecure=true${offline_params}';
+        window.location.href = 'vnc_lite.html?scale=true&cursor=${cursor_mode}&insecure=true${offline_params}';
     </script>
 </head>
 <body>

@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 
 # Custom noVNC fork, pinned to a commit so a push to the fork doesn't reach
 # installs until the add-on version is bumped
-ARG NOVNC_COMMIT=21019bfb36bfe24ad35bf86a2d59bcfee6715a64
+ARG NOVNC_COMMIT=75ee8fa87484465f5de6aad6576a86248cb5e8aa
 RUN git config --global advice.detachedHead false && \
     rm -rf /noVNC && \
     git clone https://github.com/BitterRose/noVNC-BitterRose.git /noVNC && \

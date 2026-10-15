@@ -75,6 +75,11 @@ List of VNC servers. Each server requires the following parameters:
 - **Default**: `No connection`
 - **Description**: Text shown in `vnc_auto.html` while there is no connection to a server
 
+### `force_cursor` (Optional)
+- **Type**: boolean
+- **Default**: `false`
+- **Description**: Always show the add-on's arrow cursor in `vnc_auto.html`, ignoring the cursor sent by the server, so every server shows the same cursor. By default the arrow is shown only where the server hides its cursor.
+
 ## Connection loss
 
 `vnc_auto.html` covers the screen with the server's logo (or name) and `offline_text` when the connection fails or drops, and reconnects on its own (after 5, 10, 20, then every 30 seconds). A connection attempt that takes longer than 10 seconds counts as failed.
