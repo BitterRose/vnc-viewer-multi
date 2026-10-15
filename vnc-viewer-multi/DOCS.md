@@ -84,7 +84,7 @@ List of VNC servers. Each server requires the following parameters:
 
 `vnc_auto.html` covers the screen with the server's logo (or name) and `offline_text` when the connection fails or drops, and reconnects on its own (after 5, 10, 20, then every 30 seconds). A connection attempt that takes longer than 10 seconds counts as failed.
 
-When a server hides its own cursor (common on touch panels), a white arrow with a black outline is shown instead.
+When a server hides its own cursor (common on touch panels), a white arrow with a black outline (16x27) is shown instead.
 
 ## Available Proxy Ports
 
