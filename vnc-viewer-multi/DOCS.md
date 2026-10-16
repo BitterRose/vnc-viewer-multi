@@ -68,12 +68,22 @@ List of VNC servers. Each server requires the following parameters:
 #### `logo` (Optional)
 - **Type**: string (URL)
 - **Description**: Image shown in `vnc_auto.html` while there is no connection to this server. Without it the server name is shown.
-- **Example**: `http://192.168.1.5:8123/local/logo/office.png`
+- **Example**: `http://192.168.1.5:8123/local/logo/office.png` (a logo without its own background works best: it is shown on a white card)
 
 ### `offline_text` (Optional)
 - **Type**: string
 - **Default**: `No connection`
 - **Description**: Text shown in `vnc_auto.html` while there is no connection to a server
+
+### `retry_text` (Optional)
+- **Type**: string
+- **Default**: `Retrying in {s} s`
+- **Description**: Countdown under the "no connection" badge; `{s}` is replaced by the seconds left
+
+### `connecting_text` (Optional)
+- **Type**: string
+- **Default**: `Connecting…`
+- **Description**: Shown under the badge while a connection attempt is running
 
 ### `force_cursor` (Optional)
 - **Type**: boolean
@@ -82,7 +92,7 @@ List of VNC servers. Each server requires the following parameters:
 
 ## Connection loss
 
-`vnc_auto.html` covers the screen with the server's logo (or name) and `offline_text` when the connection fails or drops, and reconnects on its own (after 5, 10, 20, then every 30 seconds). A connection attempt that takes longer than 10 seconds counts as failed.
+`vnc_auto.html` covers the screen with the server's logo (or name) on a white card, an `offline_text` badge and a `retry_text` countdown when the connection fails or drops, and reconnects on its own (after 2, 10, 20, then every 30 seconds). A connection attempt that takes longer than 10 seconds counts as failed. A connection that goes silent (e.g. Home Assistant hung without closing it) is detected within about 5 seconds: after 1 second without data the viewer asks the server for one pixel, which it has to answer.
 
 When a server hides its own cursor (common on touch panels), a white arrow with a black outline (16x27) is shown instead.
 

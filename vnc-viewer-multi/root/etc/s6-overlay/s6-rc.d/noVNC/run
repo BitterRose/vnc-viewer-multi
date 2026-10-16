@@ -63,9 +63,11 @@ for server in $(bashio::config 'vnc_servers|keys'); do
     if bashio::config.has_value "vnc_servers[${server}].logo"; then
         offline_params+="&logo=$(urlencode "$(bashio::config "vnc_servers[${server}].logo")")"
     fi
-    if bashio::config.has_value 'offline_text'; then
-        offline_params+="&offline_text=$(urlencode "$(bashio::config 'offline_text')")"
-    fi
+    for text in offline_text retry_text connecting_text; do
+        if bashio::config.has_value "${text}"; then
+            offline_params+="&${text}=$(urlencode "$(bashio::config "${text}")")"
+        fi
+    done
 
     # Create a redirect page with auto-login for convenience
     if bashio::config.has_value "vnc_servers[${server}].password"; then
