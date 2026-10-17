@@ -60,6 +60,10 @@ for server in $(bashio::config 'vnc_servers|keys'); do
 
     # Name, logo and text for the "no connection" panel in vnc_lite.html
     offline_params="&name=$(urlencode "${name}")"
+    # Picture quality: 0-9 (JPEG quality) or "lossless"; noVNC's default when not set
+    if bashio::config.has_value "vnc_servers[${server}].quality"; then
+        offline_params+="&quality=$(urlencode "$(bashio::config "vnc_servers[${server}].quality")")"
+    fi
     if bashio::config.has_value "vnc_servers[${server}].logo"; then
         offline_params+="&logo=$(urlencode "$(bashio::config "vnc_servers[${server}].logo")")"
     fi

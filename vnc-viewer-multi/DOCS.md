@@ -70,6 +70,11 @@ List of VNC servers. Each server requires the following parameters:
 - **Description**: Image shown in `vnc_auto.html` while there is no connection to this server. Without it the server name is shown.
 - **Example**: `http://192.168.1.5:8123/local/logo/office.png` (a logo without its own background works best: it is shown on a white card)
 
+#### `quality` (Optional)
+- **Type**: `0`-`9` or `lossless`
+- **Default**: noVNC's default (6)
+- **Description**: Picture quality. With Tight encoding (UltraVNC, TightVNC) `0`-`9` is the JPEG quality for photo-like areas; `lossless` turns JPEG off - the sharpest picture, usually only a little more data on a local network
+
 ### `offline_text` (Optional)
 - **Type**: string
 - **Default**: `No connection`
